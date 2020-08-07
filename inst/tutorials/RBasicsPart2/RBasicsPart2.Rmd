@@ -6,7 +6,7 @@ output:
     allow_skip: true
 runtime: shiny_prerendered
 description: >
-  Learn how to .
+  Learn how to read in data and execute simple functions on variables in a data frame.
 --- 
 
 
@@ -15,22 +15,27 @@ description: >
 
 This tutorial is designed to familiarize you with some of the basics of using R. Specifically you will learn:
 
-* How to read in comma separted or .csv files
-* How to read in R data or .RData files
-* How to access variables in a data frame
-* XXX
-
+* How to read in R data or .RData files with the `load()` function
+* How to read in comma separated or .csv files, tab delimited or .txt files, and Stata data or .dta files using the `import()` function from the <span style="color:DarkGreen">rio</span> package
+* How to get to know the structure of your data with the `class()`, `View()`, `nrow()`, `ncol()`, `names()`, `head()`, `str()`, `is.na()`, `sum()` functions
+* How to access variables in a data frame using $
+* How to execute simple functions on variables: `mean()`, `min()`, `max()`, and `range()`
+* How to use the `save()` function to save objects as an .RData file
 
 ```{r setup, include=FALSE}
 library(learnr)
 library(tidyverse)
 library(knitr)
 library(rio)
+library(RCurl)
+library(datasets)
 load("Counties2016.RData")
-tutorial_options(exercise.timelimit = 60)
+library(gradethis)
+tutorial_options(exercise.checker = gradethis::grade_learnr)
+#tutorial_options(exercise.timelimit = 60)
 knitr::opts_chunk$set(error = TRUE)
 UN.FB.posts<-read.csv("unitednations.csv")
-turnout <- import("turnout.txt")
+turnout <- import("turnout2.txt")
 oil <- import("oilwomen.dta")
 ```
 
@@ -52,13 +57,15 @@ R has its own file format called .RData. We use the `load()` function to read in
 
 Also note that when the file is loaded the objects it contains will already exist. This means you do not assign the result of `load()` to a new object. If you do so, it will have no effect. To learn the name of any objects in the .RData file, use the `verbose` argument inside `load()` and set it equal to TRUE.
 
-When naming the file containing the data you will need to tell the function where the file is located. If you are working in R Studio Cloud, the file will typically be in the same directory as the file as your code so that no path is required. But if you are working on a local machine or if the data is not in your working directory, you will need to specify a full path.
+When naming the file containing the data you will need to tell the function where the file is located. If you are working in R Studio Cloud, the file will typically be in the same directory as the file as your code so that no path is required. But if you are working on a local machine or if the data is not in your working directory, you will need to specify a full path.  
 
-```{r load, exercise=TRUE}
+
+
+```{r load, exercise=TRUE, eval=FALSE}
 load("Counties2016.RData", verbose=TRUE)
 ```
 
-## Loading other file types
+## Importing other file types
 
 
 You can import all files in all kinds of data formats in R using various packages. To simplify, we will use the `import()` function in the R package <span style="color:DarkGreen">rio</span>. The function uses the file extension to determine the file type and then runs the appropriate functions behind the scenes so you don't have to learn the functions for each file type. The code below loads three different types of files.
@@ -69,15 +76,14 @@ Here again, if the file is not in the same directory as your code file you will 
 
 Because the functions in the package <span style="color:DarkGreen">rio</span> are not a part of base R, we need to load the package with the `library()` function before we can use the `import()` function.
 
-
 ```{r rio, exercise=TRUE}
 library(rio)
 #Comma separated (.csv) file
-UN.FB.posts <- import("/Users/sld8/Dropbox/PLSC309/FA2019/RNotebooks/Introduction/unitednations.csv")
+UN.FB.posts <- import("unitednations.csv")
 #Tab delimited (.txt) file
-turnout <- import("/Users/sld8/Dropbox/PLSC309/FA2020/RTutorials/turnout.txt")
+turnout <- import("turnout2.txt")
 #Stata (.dta) file
-oil <- import("/Users/sld8/Dropbox/PLSC309/FA2020/RTutorials/oilwomen.dta")
+oil <- import("oilwomen.dta")
 ```
 
 
@@ -86,14 +92,22 @@ oil <- import("/Users/sld8/Dropbox/PLSC309/FA2020/RTutorials/oilwomen.dta")
 
 The first step after loading a data set is to learn something about its contents. We will use the data set unitednations.csv, which we loaded as the object **UN.FB.posts**. The data contains information related to the social media posts published on the United Nations Facebook page during 2015. Write code below to determine the class of this object. 
 
-```{r class, exercise=TRUE}
+```{r classname, exercise=TRUE}
 
 ```
 
-```{r class-solution}
+```{r classname-hint}
+Place the name of the object inside the class function.
+```
+
+
+```{r classname-check}
+grade_code("That's easy, right?")
+```
+
+```{r classname-solution}
 class(UN.FB.posts)
 ```
-
 
 ### Viewing the contents of a data frame
 
@@ -114,22 +128,46 @@ Each row of a data frame contains a single observation, here a unique Facebook p
 nrow(UN.FB.posts)
 ```
 
-How could you determine how many posts were published, on average, per day in 2015?
+Can you determine how many posts were published, on average, per day in 2015?
 
-```{r howmany, exercise=TRUE}
+```{r howmanyposts, exercise=TRUE}
 
 ```
 
-```{r howmany-solution}
+
+```{r howmanyposts-hint}
+There are 365 days in this year and the number of
+rows in the data is given by nrows(UN.FB.posts),
+so divide the latter by the former.
+```
+
+
+```{r howmanyposts-check}
+grade_code("So simple.")
+```
+
+```{r howmanyposts-solution}
 nrow(UN.FB.posts)/365
 ```
 
+
 Each column of a data frame contains a single variable. We use the `ncol()` function to learn the number of columns in the same manner as we used the `nrow()` function to learn the number of rows. How many variables are in **UN.FB.posts**?
 
-```{r ncol, exercise=TRUE}
+```{r ncolquest, exercise=TRUE}
+
+```
+
+```{r ncolquest-hint}
+Place the data object inside the ncol function
+```
+
+```{r ncolquest-solution}
 ncol(UN.FB.posts)
 ```
 
+```{r ncolquest-check}
+grade_code("")
+```
 
 ### Determining variable names 
 
@@ -139,7 +177,19 @@ We can see the names of the variables in our data.frame using the `names()` func
 
 
 ```{r names, exercise=TRUE}
+
+```
+
+```{r names-hint}
+Place the name of the data object inside the names function.
+```
+
+```{r names-solution}
 names(UN.FB.posts)
+```
+
+```{r names-check}
+grade_code()
 ```
 
 Here is a short description of each variable in the data set.
@@ -210,8 +260,18 @@ How many missing values are there for the variable **likes_count**?
 
 ```
 
+```{r sumna2-hint}
+Wrap the sum function around the is.na function
+applied to likes_count. Don't forget to name the
+data object$ before listing the variable name.
+```
+
 ```{r sumna2-solution}
 sum(is.na(UN.FB.posts$likes_count))
+```
+
+```{r sumna2-check}
+grade_code()
 ```
 
 ### Handling missing values
@@ -231,12 +291,14 @@ mean(UN.FB.posts$shares,na.rm=TRUE)
 
 Objects we create in an R session will be temporarily saved in the *workspace*, which is just the current working environment. If we want to save them permanently we *could*  save the workspace. R will ask us if we want to save the workspace every time we exit. **say no**! Instead, if you want to save the objects (or some subset of the objects) you've created in your R session, use the `save()` function, which takes as arguments the names of the objects you wish to save and the name of the file to give your new data file.
 
+The following code saves **UN.FB.posts** as an R data set, but it cannot be run from the tutorial.
 
-```{r save, exercise=TRUE}
-save(UN.FB.posts, file="/Users/sld8/Dropbox/PLSC309/FA2019/RNotebooks/Introduction/Session1Data.Rdata")  # This saves the object UN.FB.posts as an R data set.
+
+```{r save, exercise=FALSE, eval=FALSE}
+save(UN.FB.posts, file="/Users/sld8/Dropbox/PLSC309/MyDataFile.Rdata")
 ```
 
-If we had created new objects separate from those in **UN.FB.posts**, saving **UN.FB.posts** will not save them. We will revisit techniques for saving multiple objects later in the semester.
+If we had created new objects separate from those in **UN.FB.posts**, saving **UN.FB.posts** will not save them. 
 
 
 
@@ -260,6 +322,10 @@ function to get the answer.
 nrow(UN.FB.posts)
 ```
 
+```{r howmany2-check}
+grade_code()
+```
+
 2. What was the text of the first post in the data set?
 
 ```{r text, exercise=TRUE}
@@ -276,6 +342,9 @@ row.
 UN.FB.posts$message[1]
 ```
 
+```{r text-check}
+grade_code()
+```
 
 3. How many likes did posts receive on average?
 
@@ -290,6 +359,11 @@ Include the na.rm argument. It's always good practice.
 
 ```{r likes-solution}
 mean(UN.FB.posts$likes_count, na.rm=TRUE)
+```
+
+
+```{r likes-check}
+grade_code()
 ```
 
 4. How many comments did posts receive on average?
@@ -307,14 +381,28 @@ Include the na.rm argument. It's always good practice.
 mean(UN.FB.posts$comments_count, na.rm=TRUE)
 ```
 
+
+```{r mean-check}
+grade_code()
+```
+
 5. How many shares did posts receive on average?
 
 ```{r shares, exercise=TRUE}
 
 ```
 
+```{r shares-hint}
+Use the mean function with the na.rm argument sent to TRUE.
+```
+
+
 ```{r shares-solution}
-mean(UN.FB.posts$shares_count)
+mean(UN.FB.posts$shares_count, na.rm=TRUE)
+```
+
+```{r shares-check}
+grade_code()
 ```
 
 6. What was the largest number of shares a post received? 
@@ -329,6 +417,10 @@ The max function will provide this information.
 
 ```{r max-solution}
 max(UN.FB.posts$shares_count)
+```
+
+```{r max-check}
+grade_code()
 ```
 
 7. What was the smallest number of likes a post received?
@@ -346,6 +438,10 @@ associated with a post.
 min(UN.FB.posts$likes_count)
 ```
 
+```{r min-check}
+grade_code()
+```
+
 8. What was the range of the number of shares a post received?
 
 ```{r range, exercise=TRUE}
@@ -360,6 +456,9 @@ The range function will provide this information.
 range(UN.FB.posts$shares_count)
 ```
 
+```{r range-check}
+grade_code()
+```
 
 
 
