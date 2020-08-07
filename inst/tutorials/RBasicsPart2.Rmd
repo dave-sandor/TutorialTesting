@@ -1,0 +1,365 @@
+---
+title: "R Basics: Part 2"
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+description: >
+  Learn how to .
+--- 
+
+
+
+## Learning Objectives
+
+This tutorial is designed to familiarize you with some of the basics of using R. Specifically you will learn:
+
+* How to read in comma separted or .csv files
+* How to read in R data or .RData files
+* How to access variables in a data frame
+* XXX
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(tidyverse)
+library(knitr)
+library(rio)
+load("Counties2016.RData")
+tutorial_options(exercise.timelimit = 60)
+knitr::opts_chunk$set(error = TRUE)
+UN.FB.posts<-read.csv("unitednations.csv")
+turnout <- import("turnout.txt")
+oil <- import("oilwomen.dta")
+```
+
+
+## Data Files
+
+The data we looked at in Part 1 was manually entered. More likely we will work with a data set created somewhere else or by someone else that has been saved as one of several types of files. Regardless of the type of data file, data sets share a common structure. You can think of a spread sheet. Each row of the data set contains data for one observation: values of all variables for a single case. Each column of the data set contains values of a single variable for all observations.
+
+Each row of the data set below contains an observation for a single county in the US. Each column records values of variables measured for each county in the 2016 presidential election.
+
+
+![](images/DataEx.png){width=70%}
+
+R will read in virtually any type of data file you might wish. We will introduce the `load()` function for reading in R data(.RData) files and the `import()` function in the R package <span style="color:DarkGreen">rio</span> for reading in comma delimited (.csv), tab delimited (.txt) files, and Stata data (.dta) files. Other types of files can be read with `import()`, but this covers all the types of files we will use this semester.
+
+## Loading R data files (extension .RData)
+
+R has its own file format called .RData. We use the `load()` function to read in these files. Note that we do not need to specify any arguments other than the file name.  
+
+Also note that when the file is loaded the objects it contains will already exist. This means you do not assign the result of `load()` to a new object. If you do so, it will have no effect. To learn the name of any objects in the .RData file, use the `verbose` argument inside `load()` and set it equal to TRUE.
+
+When naming the file containing the data you will need to tell the function where the file is located. If you are working in R Studio Cloud, the file will typically be in the same directory as the file as your code so that no path is required. But if you are working on a local machine or if the data is not in your working directory, you will need to specify a full path.
+
+```{r load, exercise=TRUE}
+load("Counties2016.RData", verbose=TRUE)
+```
+
+## Loading other file types
+
+
+You can import all files in all kinds of data formats in R using various packages. To simplify, we will use the `import()` function in the R package <span style="color:DarkGreen">rio</span>. The function uses the file extension to determine the file type and then runs the appropriate functions behind the scenes so you don't have to learn the functions for each file type. The code below loads three different types of files.
+
+Unlike .RData files, you need to assign the file to an object.
+
+Here again, if the file is not in the same directory as your code file you will need to specify the path to tell `import()` where to find the data file.
+
+Because the functions in the package <span style="color:DarkGreen">rio</span> are not a part of base R, we need to load the package with the `library()` function before we can use the `import()` function.
+
+
+```{r rio, exercise=TRUE}
+library(rio)
+#Comma separated (.csv) file
+UN.FB.posts <- import("/Users/sld8/Dropbox/PLSC309/FA2019/RNotebooks/Introduction/unitednations.csv")
+#Tab delimited (.txt) file
+turnout <- import("/Users/sld8/Dropbox/PLSC309/FA2020/RTutorials/turnout.txt")
+#Stata (.dta) file
+oil <- import("/Users/sld8/Dropbox/PLSC309/FA2020/RTutorials/oilwomen.dta")
+```
+
+
+
+## Learning about the data
+
+The first step after loading a data set is to learn something about its contents. We will use the data set unitednations.csv, which we loaded as the object **UN.FB.posts**. The data contains information related to the social media posts published on the United Nations Facebook page during 2015. Write code below to determine the class of this object. 
+
+```{r class, exercise=TRUE}
+
+```
+
+```{r class-solution}
+class(UN.FB.posts)
+```
+
+
+### Viewing the contents of a data frame
+
+You can view the contents of a data frame using the `View()` function or by double-clicking on the object name in the Global Environment tab in R Studio. (Note that this function begins with a capital letter.) It's a good idea to view your data frame to make sure you have loaded the data you intended.
+
+Depending on the browser you are using, the output may open in another window or it may appear within the tutorial.
+
+```{r view, exercise=TRUE}
+View(UN.FB.posts)
+```
+
+
+### Determining number of rows and columns
+
+Each row of a data frame contains a single observation, here a unique Facebook post. The `nrow()` function returns the number of rows in the data frame.  Simply pass the `nrow()` function the name of the data frame object. How many posts are in the data frame? 
+
+```{r nrow, exercise=TRUE}
+nrow(UN.FB.posts)
+```
+
+How could you determine how many posts were published, on average, per day in 2015?
+
+```{r howmany, exercise=TRUE}
+
+```
+
+```{r howmany-solution}
+nrow(UN.FB.posts)/365
+```
+
+Each column of a data frame contains a single variable. We use the `ncol()` function to learn the number of columns in the same manner as we used the `nrow()` function to learn the number of rows. How many variables are in **UN.FB.posts**?
+
+```{r ncol, exercise=TRUE}
+ncol(UN.FB.posts)
+```
+
+
+### Determining variable names 
+
+We've learned **UN.FB.posts**  contains 1643 Facebook posts (rows) and 8 variables (columns). 
+
+We can see the names of the variables in our data.frame using the `names()` function we introduced in the R Basics tutorial Part 1.
+
+
+```{r names, exercise=TRUE}
+names(UN.FB.posts)
+```
+
+Here is a short description of each variable in the data set.
+
+Name | Description
+---------------- | --------------------------
+type | Type of post (link, photo, video, ...)
+date | Date when post was published
+likes_count | Total likes on post
+comments_count | Total comments on the post
+shares_count | Total shares of the post
+month | Month when post was published (numeric)
+url | Direct URL of post
+message | Text of post, NA if no text
+
+### The `head()` and `str()` functions
+
+We can examine the first few rows of the data frame using the `head()` function. By default it prints the first 6 rows. To look at more or less, specify the `n` argument.
+
+```{r str, exercise=TRUE}
+head(UN.FB.posts, n=5)
+```
+The `str()` function displays the structure of the data frame. Specifically it provides the number of observations and variables and then lists each variable along with its type and the values of first few observations.
+
+```{r head, exercise=TRUE}
+str(UN.FB.posts)
+```
+### The `summary()` function
+
+The `summary()` function can be used to obtain some basic descriptive information about the contents of a data frame object. What information is displayed will depend on the class of the variable. For numeric variables it will report the minimum value, the value at the 1st quartile, the median, the value at the third quartile, and the maximum value.
+
+```{r summar, exercise=TRUE}
+summary(UN.FB.posts)
+```
+
+
+
+## Working with variables in a data.frame
+
+Often we will want to access a specific variable in a data frame. To do so  we use the `$` operator. Specifically, we type DATA_FRAME_NAME\$COLUMN_NAME. So, if we wanted to print the contents of the variable **type** in the data frame **UN.FB.posts**, we would refer to it using **UN.FB.posts$type**. I've wrapped the variable inside the `head()` function to avoid printing all 1743 values.
+
+
+```{r type, exercise=TRUE}
+head(UN.FB.posts$type)
+```
+
+
+## Missing values
+
+
+When working with data frames often some observations will not have data on one or more variables. A missing value code is assigned to these observations. We can use the `is.na()` function to learn about missing values. This function takes one argument, the name of the vector whose values we wish to evaluate.  The function returns a TRUE if a value of the vector is missing and FALSE if a value is not missing. I've wrapped the call to `is.na()` inside `head()` to limit the output here as well.
+
+```{r isna, exercise=TRUE}
+head(is.na(UN.FB.posts$message))
+```
+
+
+We can use this function to determine how many posts do not have any text (which are denoted with missing values). We need to wrap the `sum()` function around the `is.na()` function to answer this question. The `sum()` function will count the number of TRUE entries in the vector of messages.
+
+
+```{r sumna, exercise=TRUE}
+sum(is.na(UN.FB.posts$message))
+```
+
+How many missing values are there for the variable **likes_count**?
+
+```{r sumna2, exercise=TRUE}
+
+```
+
+```{r sumna2-solution}
+sum(is.na(UN.FB.posts$likes_count))
+```
+
+### Handling missing values
+
+Some functions will not work if there are missing values present. Above we learned that there are 173 messages with no content. These are missing a message. None of the other variables have missing values. But often we will encounter variables that are missing a value for at least one entry. 
+
+If there are missing values in a vector, we include `na.rm=TRUE` (must be all caps) as an argument to many functions to tell R to drop the cases with missing values before executing the function.
+
+Let's calculate the mean number of shares for UN Facebook posts, allowing for missing values (there are not any so we would get the same value if we did not use this option but we would get an error if we omit the option when there are missing values).
+
+```{r naex, exercise=TRUE}
+mean(UN.FB.posts$shares,na.rm=TRUE)
+```
+
+
+## Saving the data
+
+Objects we create in an R session will be temporarily saved in the *workspace*, which is just the current working environment. If we want to save them permanently we *could*  save the workspace. R will ask us if we want to save the workspace every time we exit. **say no**! Instead, if you want to save the objects (or some subset of the objects) you've created in your R session, use the `save()` function, which takes as arguments the names of the objects you wish to save and the name of the file to give your new data file.
+
+
+```{r save, exercise=TRUE}
+save(UN.FB.posts, file="/Users/sld8/Dropbox/PLSC309/FA2019/RNotebooks/Introduction/Session1Data.Rdata")  # This saves the object UN.FB.posts as an R data set.
+```
+
+If we had created new objects separate from those in **UN.FB.posts**, saving **UN.FB.posts** will not save them. We will revisit techniques for saving multiple objects later in the semester.
+
+
+
+## Practice 
+
+Using the functions we've covered so far, do your best to answer the following questions. 
+
+
+1. How how many posts were published in 2015?
+
+```{r howmany2, exercise=TRUE}
+
+```
+
+```{r howmany2-hint}
+Since each row of the data contains one post, we can use the nrow() 
+function to get the answer.
+```
+
+```{r howmany2-solution}
+nrow(UN.FB.posts)
+```
+
+2. What was the text of the first post in the data set?
+
+```{r text, exercise=TRUE}
+
+```
+
+
+```{r text-hint}
+Use the indexing function -- [ ] -- and specify the first 
+row.
+```
+
+```{r text-solution}
+UN.FB.posts$message[1]
+```
+
+
+3. How many likes did posts receive on average?
+
+```{r likes, exercise=TRUE}
+
+```
+
+```{r likes-hint}
+The mean function will return the average numbers of likes.
+Include the na.rm argument. It's always good practice.
+```
+
+```{r likes-solution}
+mean(UN.FB.posts$likes_count, na.rm=TRUE)
+```
+
+4. How many comments did posts receive on average?
+
+```{r mean, exercise=TRUE}
+
+```
+
+```{r mean-hint}
+The mean function will return the average  number of posts. 
+Include the na.rm argument. It's always good practice.
+```
+
+```{r mean-solution}
+mean(UN.FB.posts$comments_count, na.rm=TRUE)
+```
+
+5. How many shares did posts receive on average?
+
+```{r shares, exercise=TRUE}
+
+```
+
+```{r shares-solution}
+mean(UN.FB.posts$shares_count)
+```
+
+6. What was the largest number of shares a post received? 
+
+```{r max, exercise=TRUE}
+
+```
+
+```{r max-hint}
+The max function will provide this information.
+```
+
+```{r max-solution}
+max(UN.FB.posts$shares_count)
+```
+
+7. What was the smallest number of likes a post received?
+
+```{r min, exercise=TRUE}
+
+```
+
+```{r min-hint}
+Use the min function to find the smallest number of likes
+associated with a post.
+```
+
+```{r min-solution}
+min(UN.FB.posts$likes_count)
+```
+
+8. What was the range of the number of shares a post received?
+
+```{r range, exercise=TRUE}
+
+```
+
+```{r range-hint}
+The range function will provide this information.
+```
+
+```{r range-solution}
+range(UN.FB.posts$shares_count)
+```
+
+
+
+
