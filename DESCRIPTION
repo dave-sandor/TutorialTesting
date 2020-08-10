@@ -14,6 +14,6 @@ Imports:
     testwhat,
     knitr
 Remotes:
-    rstudio-education/gradethis
+    rstudio-education/gradethis,
     datacamp/testwhat
 RoxygenNote: 7.1.1
