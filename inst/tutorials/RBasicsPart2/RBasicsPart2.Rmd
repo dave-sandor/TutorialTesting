@@ -62,7 +62,7 @@ When naming the file containing the data you will need to tell the function wher
 
 
 ```{r load, exercise=TRUE, eval=FALSE}
-load("counties2016.RData", verbose=TRUE)
+load("/cloud/project/counties2016.RData", verbose=TRUE)
 ```
 
 ## Importing other file types
