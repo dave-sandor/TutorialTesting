@@ -47,7 +47,7 @@ The data we looked at in Part 1 was manually entered. More likely we will work w
 Each row of the data set below contains an observation for a single county in the US. Each column records values of variables measured for each county in the 2016 presidential election.
 
 
-##![](images/DataEx.png){width=70%}
+![](images/DataEx.png){width=70%}
 
 R will read in virtually any type of data file you might wish. We will introduce the `load()` function for reading in R data(.RData) files and the `import()` function in the R package <span style="color:DarkGreen">rio</span> for reading in comma delimited (.csv), tab delimited (.txt) files, and Stata data (.dta) files. Other types of files can be read with `import()`, but this covers all the types of files we will use this semester.
 
@@ -62,7 +62,7 @@ When naming the file containing the data you will need to tell the function wher
 
 
 ```{r load, exercise=TRUE, eval=FALSE}
-load("Counties2016.RData", verbose=TRUE)
+load("counties2016.RData", verbose=TRUE)
 ```
 
 ## Importing other file types
