@@ -41,7 +41,7 @@ The data we looked at in Part 1 was manually entered. More likely we will work w
 
 Each row of the data set below contains an observation for a single county in the US. Each column records values of variables measured for each county in the 2016 presidential election.
 
-![from main images folder](images/DataEx.png)
+![from main images folder](images/DataEx.png){width=70%}
 ![from images within tutorial folder] (DataEx.png)
 ![From GitHub](https://github.com/dave-sandor/TutorialTesting/raw/master/images/DataEx.png){width=70%}
 
